@@ -1,6 +1,6 @@
 'use strict';
 
-require('../test').then(() => {
+require('../test/test.js').then(() => {
 	
 	require('@ltd/j-dev').
 		
