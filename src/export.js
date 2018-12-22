@@ -1,4 +1,4 @@
-import version from '../version?text';
+import version from './version?text';
 import parse from './parse.js';
 import stringify from './stringify.js';
 import Space from './Space.js';

@@ -8,5 +8,8 @@
 	"repository": {
 		"type": "git",
 		"url": "https://GitHub.com/LongTengDao/j-tabdoc.git"
-	}
+	},
+	"keywords": [
+		"TabDoc"
+	]
 }
