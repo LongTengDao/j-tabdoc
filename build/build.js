@@ -12,7 +12,7 @@ require('../test/test.js')(async ({ build, read }) => {
 		ES: 3,
 		ESM: true,
 		NPM: {
-			'...': {
+			meta_: {
 				description: 'The official standard implementation of TabDoc. Belong to "Plan J".／TabDoc 的官方标准实现。从属于“简计划”。',
 				keywords: ['TabDoc'],
 			},
