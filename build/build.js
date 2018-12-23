@@ -17,7 +17,7 @@ require('../test/test.js')(async ({ build, read }) => {
 				keywords: ['TabDoc'],
 			},
 		},
-		UMD: { ES: 3 },
+		UMD: true,
 		DOC: true,
 	});
 
