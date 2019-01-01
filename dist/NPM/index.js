@@ -1,47 +1,36 @@
 ﻿'use strict';
 
-var version = '1.0.0';
+var version = '1.0.1';
 
 // Object, Array, Buffer
-
 var undefined$1;
 var toString = Object.prototype.toString;
 var push = Array.prototype.push;
-var isArray = Array.isArray || function (lines) {
-	return toString.call(lines)==='[object Array]';
-};
+var isArray = Array.isArray || function isArray (lines) { return toString.call(lines)==='[object Array]'; };
 
 if ( typeof Buffer==='function' ) {
-	isBuffer = Buffer.isBuffer;
-	var from = Buffer.from;
-	var toStringFollowBOM = function (buffer) {
-		switch ( buffer[0] ) {
-			case 0xEF:
-				if ( buffer[1]===0xBB && buffer[2]===0xBF ) { return buffer.slice(3).toString('utf8'); }
-				break;
-			case 0xFF:
-				if ( buffer[1]===0xFE ) { return buffer.slice(2).toString('ucs2'); }
-				break;
-			case 0xFE:
-				if ( buffer[1]===0xFF ) {
-					buffer = from(buffer);
-					return buffer.swap16().slice(2).toString('ucs2');
-				}
-				break;
-		}
-		return buffer.toString();
-	};
+	var isBuffer = Buffer.isBuffer;
+	if ( typeof isBuffer==='function' && typeof Buffer.from==='function' ) {
+		var from = Buffer.hasOwnProperty('from') ? Buffer.from : function from (buffer) { return new Buffer(buffer); };
+		var toStringFollowBOM = function toStringFollowBOM (buffer) {
+			switch ( buffer[0] ) {
+				case 0xEF: if ( buffer[1]===0xBB && buffer[2]===0xBF ) { return buffer.slice(3).toString('utf8'); } break;
+				case 0xFF: if ( buffer[1]===0xFE ) { return buffer.slice(2).toString('ucs2'); } break;
+				case 0xFE: if ( buffer[1]===0xFF ) { buffer = from(buffer); return buffer.swap16().slice(2).toString('ucs2'); } break;
+			}
+			return buffer.toString();
+		};
+	}
+	else { isBuffer = function isBuffer () { return false; }; }
 }
-else {
-	var isBuffer = function () { return false; };
-}
+else { isBuffer = function isBuffer () { return false; }; }
 
 var POSITIVE_INTEGER = /^[1-9]\d*$/;
 
 var repeatSpace = ''.repeat
-	? function (count) { return ' '.repeat(count); }
+	? function repeatSpace (count) { return ' '.repeat(count); }
 	: function (spaces) {
-		return function (count) {
+		return function repeatSpace (count) {
 			spaces.length = count+1;
 			return spaces.join(' ');
 		};
