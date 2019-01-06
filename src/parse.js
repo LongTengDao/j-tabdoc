@@ -34,7 +34,7 @@ export default function parse (tabLines, _reviver, _number, _debug) {
 			if ( !isArray(groupReviver) ) { throw new TypeError('jTabDoc.parse(,reviver.group)'); }
 			for ( var length = groupReviver.length, index = 0; index<length; ++index ) {
 				var each = groupReviver[index];
-				if ( !isArray(each) ) { throw new TypeError('jTabDoc.parse(,reviver.group[*])'); }
+				if ( !each ) { throw new TypeError('jTabDoc.parse(,reviver.group[*])'); }
 				if ( !each[0] || typeof each[0].exec!=='function' ) { throw new TypeError('jTabDoc.parse(,reviver.group[*][0])'); }
 				if ( typeof each[1]!=='function' ) { throw new TypeError('jTabDoc.parse(,reviver.group[*][1])'); }
 			}
