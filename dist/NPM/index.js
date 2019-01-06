@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-var version = '1.0.1';
+var version = '2.0.0';
 
 // Object, Array, Buffer
 var undefined$1;
@@ -86,7 +86,7 @@ function parse (tabLines, _reviver, _number, _debug) {
 		if ( !POSITIVE_INTEGER.test(_number) ) { throw new RangeError('jTabDoc.parse(,,number)'); }
 	}
 	return tabLines.length===0 ?
-		levelReviver===null ? [] : call(levelReviver, this, []) :
+		levelReviver===null ? [] : levelReviver([], this) :
 		Level(this, tabLines, groupReviver ? appendGroup : appendFlat, countEmpties, groupReviver, levelReviver, _number, _debug);
 }
 function Level (context, tabLines, append, countEmpties, groupReviver, levelReviver, number, debug) {
@@ -135,7 +135,7 @@ function Level (context, tabLines, append, countEmpties, groupReviver, levelRevi
 		}
 	}
 	level.number = number;
-	return levelReviver===null ? level : call(levelReviver, context, level);
+	return levelReviver===null ? level : levelReviver(level, context);
 }
 
 function appendFlat (context, level, countEmpties, groupReviver, levelReviver, tabLines, firstIndex, lastIndex, baseNumber, debug) {
@@ -259,7 +259,7 @@ function appendGroup (context, level, countEmpties, groupReviver, levelReviver, 
 		var thisKeys = matched[0];
 		var keyLength = thisKeys.length;
 		if ( pendingKeys.length===keyLength ) {
-			level.push(call(regExp_function[1], context, pendingGroup.length===1 ? pendingGroup[0] : pendingGroup));
+			level.push(regExp_function[1](pendingGroup.length===1 ? pendingGroup[0] : pendingGroup, context));
 			if ( debug ) {
 				if ( level[level.length-1]===undefined$1 ) { throw new TypeError('jTabDoc.parse(,reviver.group[*][1]())'); }
 			}
@@ -270,7 +270,7 @@ function appendGroup (context, level, countEmpties, groupReviver, levelReviver, 
 			indexOfLF = thisKeys.indexOf('\n', indexOfLF+1);
 			if ( indexOfLF<0 ) { break; }
 		}
-		level.push(call(regExp_function[1], context, count===1 ? pendingGroup.shift() : pendingGroup.splice(0, count)));
+		level.push(regExp_function[1](count===1 ? pendingGroup.shift() : pendingGroup.splice(0, count), context));
 		if ( debug ) {
 			if ( level[level.length-1]===undefined$1 ) { throw new TypeError('jTabDoc.parse(,reviver.group[*][1]())'); }
 		}
@@ -278,12 +278,6 @@ function appendGroup (context, level, countEmpties, groupReviver, levelReviver, 
 		pendingKeys = pendingKeys.slice(keyLength);
 	}
 	throw new Error('jTabDoc.parse(,reviver.group[!])');
-}
-
-function call (reviver, context, argument) {
-	return reviver.prototype==null
-		? reviver(argument, context)
-		: new reviver(argument, context);
 }
 
 function stringify (level, _replacer, _space, _debug) {
