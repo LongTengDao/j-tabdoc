@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-var version = '2.1.0';
+var version = '2.1.1';
 
 // Object, Array, Buffer
 var undefined$1;
@@ -74,12 +74,16 @@ function parse (tabLines, _reviver, _number, _debug) {
 		if ( typeof countEmpties!=='boolean' ) { throw new TypeError('jTabDoc.parse(,reviver.empty)'); }
 		if ( groupReviver!==null && typeof groupReviver!=='boolean' ) {
 			if ( !isArray(groupReviver) ) { throw new TypeError('jTabDoc.parse(,reviver.group)'); }
-			for ( var length = groupReviver.length, index = 0; index<length; ++index ) {
+			var length = groupReviver.length;
+			if ( !length ) { throw new Error('jTabDoc.parse(,reviver.group.length)'); }
+			var index = 0;
+			do {
 				var each = groupReviver[index];
 				if ( !each ) { throw new TypeError('jTabDoc.parse(,reviver.group[*])'); }
 				if ( !each[0] || typeof each[0].exec!=='function' ) { throw new TypeError('jTabDoc.parse(,reviver.group[*][0])'); }
 				if ( typeof each[1]!=='function' ) { throw new TypeError('jTabDoc.parse(,reviver.group[*][1])'); }
 			}
+			while ( ++index<length )
 		}
 		if ( levelReviver!==null && typeof levelReviver!=='function' ) { throw new TypeError('jTabDoc.parse(,reviver.level)'); }
 		if ( typeof _number!=='number' ) { throw new TypeError('jTabDoc.parse(,,number)'); }
@@ -245,39 +249,43 @@ function appendGroup (context, level, countEmpties, groupReviver, levelReviver, 
 		level.push(pendingGroup.length===1 ? pendingGroup[0] : pendingGroup);
 		return;
 	}
-	for ( var reviverLength = groupReviver.length, reviverIndex = 0; reviverIndex<reviverLength; ++reviverIndex ) {
-		var regExp_function = groupReviver[reviverIndex];
+	for ( var first = groupReviver[0], reviverLength = groupReviver.length, reviverIndex = 0, regExp_function = first; ; ) {
 		var matched = regExp_function[0].exec(pendingKeys);
-		if ( matched===null ) { continue; }
-		if ( debug ) {
-			if ( matched===undefined$1 ) { throw new Error('jTabDoc.parse(,reviver.group[*][0].exec())'); }
-			if ( matched.index ) { throw new Error('jTabDoc.parse(,reviver.group[*][0].exec().index)'); }
-			if ( typeof matched[0]!=='string' ) { throw new TypeError('jTabDoc.parse(,reviver.group[*][0].exec()[0])'); }
-			if ( matched[0].length===0 ) { throw new Error('jTabDoc.parse(,reviver.group[*][0].exec()[0].length)'); }
-			if ( matched[0].charAt(matched[0].length-1)!=='\n' ) { throw new Error('jTabDoc.parse(,reviver.group[*][0].exec()[0])'); }
+		if ( matched===null ) {
+			if ( ++reviverIndex===reviverLength ) { throw new Error('jTabDoc.parse(,reviver.group[!])'); }
+			regExp_function = groupReviver[reviverIndex];
 		}
-		var thisKeys = matched[0];
-		var keyLength = thisKeys.length;
-		if ( pendingKeys.length===keyLength ) {
-			level.push(regExp_function[1](pendingGroup.length===1 ? pendingGroup[0] : pendingGroup, context));
+		else {
+			if ( debug ) {
+				if ( matched===undefined$1 ) { throw new Error('jTabDoc.parse(,reviver.group[*][0].exec())'); }
+				if ( matched.index ) { throw new Error('jTabDoc.parse(,reviver.group[*][0].exec().index)'); }
+				if ( typeof matched[0]!=='string' ) { throw new TypeError('jTabDoc.parse(,reviver.group[*][0].exec()[0])'); }
+				if ( matched[0].length===0 ) { throw new Error('jTabDoc.parse(,reviver.group[*][0].exec()[0].length)'); }
+				if ( matched[0].charAt(matched[0].length-1)!=='\n' ) { throw new Error('jTabDoc.parse(,reviver.group[*][0].exec()[0])'); }
+			}
+			var thisKeys = matched[0];
+			var keyLength = thisKeys.length;
+			if ( pendingKeys.length===keyLength ) {
+				level.push(regExp_function[1](pendingGroup.length===1 ? pendingGroup[0] : pendingGroup, context));
+				if ( debug ) {
+					if ( level[level.length-1]===undefined$1 ) { throw new TypeError('jTabDoc.parse(,reviver.group[*][1]())'); }
+				}
+				return;
+			}
+			var count = 1;
+			for ( var indexOfLF = thisKeys.indexOf('\n'); ; ++count ) {
+				indexOfLF = thisKeys.indexOf('\n', indexOfLF+1);
+				if ( indexOfLF<0 ) { break; }
+			}
+			level.push(regExp_function[1](count===1 ? pendingGroup.shift() : pendingGroup.splice(0, count), context));
 			if ( debug ) {
 				if ( level[level.length-1]===undefined$1 ) { throw new TypeError('jTabDoc.parse(,reviver.group[*][1]())'); }
 			}
-			return;
+			pendingKeys = pendingKeys.slice(keyLength);
+			reviverIndex = 0;
+			regExp_function = first;
 		}
-		var count = 1;
-		for ( var indexOfLF = thisKeys.indexOf('\n'); ; ++count ) {
-			indexOfLF = thisKeys.indexOf('\n', indexOfLF+1);
-			if ( indexOfLF<0 ) { break; }
-		}
-		level.push(regExp_function[1](count===1 ? pendingGroup.shift() : pendingGroup.splice(0, count), context));
-		if ( debug ) {
-			if ( level[level.length-1]===undefined$1 ) { throw new TypeError('jTabDoc.parse(,reviver.group[*][1]())'); }
-		}
-		reviverIndex = 0;
-		pendingKeys = pendingKeys.slice(keyLength);
 	}
-	throw new Error('jTabDoc.parse(,reviver.group[!])');
 }
 
 function stringify (level, _replacer, _space, _debug) {
