@@ -1,8 +1,8 @@
 ﻿'use strict';
 
-var version = '2.1.1';
+var version = '2.2.0';
 
-var UNDEFINED;
+var undefined$1 = void 0;
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
@@ -90,24 +90,24 @@ function parse(tabLines, _reviver, _number, _debug) {
         groupRevivers = _reviver.group;
         // @ts-ignore
         levelReviver = _reviver.level;
-        if (countEmpties === UNDEFINED) {
+        if (countEmpties === undefined$1) {
             countEmpties = true;
         }
-        if (groupRevivers === UNDEFINED) {
+        if (groupRevivers === undefined$1) {
             groupRevivers = null;
         }
-        if (levelReviver === UNDEFINED) {
+        if (levelReviver === undefined$1) {
             levelReviver = null;
         }
     }
-    if (_number === UNDEFINED) {
+    if (_number === undefined$1) {
         _number = 1;
     }
     if (_debug !== false) {
         if (arguments.length > 4) {
             throw new Error('jTabDoc.parse(tabLines, reviver, number, debug, ...)');
         }
-        if (_debug === UNDEFINED) {
+        if (_debug === undefined$1) {
             _debug = true;
         }
         else if (_debug !== true) {
@@ -337,7 +337,7 @@ function appendGroup(context, level, countEmpties, groupRevivers, levelReviver, 
         }
         else {
             if (debug) {
-                if (matched === UNDEFINED) {
+                if (matched === undefined$1) {
                     throw new Error('jTabDoc.parse(,reviver.group[*][0].exec())');
                 }
                 if (matched.index) {
@@ -358,7 +358,7 @@ function appendGroup(context, level, countEmpties, groupRevivers, levelReviver, 
             if (pendingKeys.length === keyLength) {
                 level.push(regExp_function[1](pendingGroup.length === 1 ? pendingGroup[0] : pendingGroup, context));
                 if (debug) {
-                    if (level[level.length - 1] === UNDEFINED) {
+                    if (level[level.length - 1] === undefined$1) {
                         throw new TypeError('jTabDoc.parse(,reviver.group[*][1]())');
                     }
                 }
@@ -373,7 +373,7 @@ function appendGroup(context, level, countEmpties, groupRevivers, levelReviver, 
             }
             level.push(regExp_function[1]((count === 1 ? pendingGroup.shift() : pendingGroup.splice(0, count)), context));
             if (debug) {
-                if (level[level.length - 1] === UNDEFINED) {
+                if (level[level.length - 1] === undefined$1) {
                     throw new TypeError('jTabDoc.parse(,reviver.group[*][1]())');
                 }
             }
@@ -391,7 +391,7 @@ function stringify(level, _replacer, _space, _debug) {
         if (arguments.length > 4) {
             throw new Error('jTabDoc.stringify(level, replacer, space, debug, ...)');
         }
-        if (_debug === UNDEFINED) {
+        if (_debug === undefined$1) {
             _debug = true;
         }
         else if (_debug !== true) {
@@ -404,10 +404,10 @@ function stringify(level, _replacer, _space, _debug) {
             throw new TypeError('jTabDoc.stringify(,,space)');
         }
     }
-    if (_replacer === UNDEFINED) {
+    if (_replacer === undefined$1) {
         _replacer = null;
     }
-    if (_space === UNDEFINED) {
+    if (_space === undefined$1) {
         _space = null;
     }
     return Lines(this, level, _replacer, _space, _debug);
