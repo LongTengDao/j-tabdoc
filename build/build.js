@@ -1,6 +1,6 @@
 'use strict';
 
-require('../test/test.js')(async ({ build, read }) => {
+require('../test/test.js')(async ({ build, get }) => {
 
 	await build({
 		name: 'j-tabdoc',
@@ -8,7 +8,7 @@ require('../test/test.js')(async ({ build, read }) => {
 		Desc: `
 			TabDoc 的官方标准实现。从属于“简计划”。
 			The official standard implementation of TabDoc. Belong to "Plan J".`,
-		semver: await read('src/version'),
+		semver: await get('src/version'),
 		ES: 3,
 		ESM: true,
 		NPM: {
