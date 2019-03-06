@@ -2,7 +2,7 @@
 
 module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default }) => {
 	
-	const jTabDoc = await import_default('src/default.js');
+	const jTabDoc = await import_default('src/default');
 	
 	const parsed = jTabDoc.parse(require('./sample'), Reviver(jTabDoc));
 	const space = jTabDoc.Space(2, 1);

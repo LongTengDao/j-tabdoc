@@ -1,7 +1,7 @@
 import version from './version?text';
-import parse from './parse.js';
-import stringify from './stringify.js';
-import Space from './Space.js';
+import parse from './parse';
+import stringify from './stringify';
+import Space from './Space';
 var jTabDoc = {
 	parse: parse,
 	stringify: stringify,

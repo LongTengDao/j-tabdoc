@@ -1,7 +1,7 @@
 'use strict';
 
-require('../test/test.js')(async ({ build, get }) => {
-
+require('../test/test.js')(async ({ build, get, map }) => {
+	
 	await build({
 		name: 'j-tabdoc',
 		Name: 'jTabDoc',
@@ -20,5 +20,7 @@ require('../test/test.js')(async ({ build, get }) => {
 		UMD: true,
 		DOC: true,
 	});
-
+	
+	await map('src/d.ts', 'dist/TSD/j-tabdoc.d.ts');
+	
 });

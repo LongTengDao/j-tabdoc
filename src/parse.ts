@@ -1,64 +1,112 @@
-import { undefined, isArray, isBuffer, toStringFollowBOM } from './global.js';// TypeError, RangeError, Error
-import { POSITIVE_INTEGER, notStringArray } from './util.js';
+import undefined from '.undefined';
+import { isArray, isBuffer, toStringFollowBOM } from './global';
+import TypeError from '.TypeError';
+import RangeError from '.RangeError';
+import Error from '.Error';
+import { POSITIVE_INTEGER, notStringArray } from './util';
 
 var BOM = /^\uFEFF/;
 var EOL = /\r\n?|\n/;
 
-export default function parse (tabLines, _reviver, _number, _debug) {
+type element = { key :string, value :string[], number :number };
+type groupReviver = {
+	0 :{ exec :(string :string) => RegExpExecArray },
+	1 :(group :element | element[], context :any) => any,
+};
+declare class level extends Array {
+	[index :number] :number | element | element[];
+	number? :number;
+}
+type levelReviver = (level :level, context :any) => any;
+
+export default function parse (
+	this :any,
+	tabLines :string[] | string | Buffer,
+	_reviver? :{
+		empty? :true | false,
+		group? :null | boolean | groupReviver[],
+		level? :null | levelReviver,
+	},
+	_number? :number,
+	_debug? :true | false
+) :any {
 	if ( !isArray(tabLines) ) {
 		if ( typeof tabLines==='string' ) { tabLines = tabLines.replace(BOM, '').split(EOL); }
 		else if ( isBuffer(tabLines) ) { tabLines = toStringFollowBOM(tabLines).split(EOL); }
 	}
 	if ( _reviver==null ) {
-		var countEmpties = true;
-		var groupReviver = null;
-		var levelReviver = null;
+		var countEmpties :boolean = true;
+		var groupRevivers :null | boolean | groupReviver[] = null;
+		var levelReviver :null | levelReviver = null;
 	}
 	else {
+		// @ts-ignore
 		countEmpties = _reviver.empty;
-		groupReviver = _reviver.group;
+		// @ts-ignore
+		groupRevivers = _reviver.group;
+		// @ts-ignore
 		levelReviver = _reviver.level;
 		if ( countEmpties===undefined ) { countEmpties = true; }
-		if ( groupReviver===undefined ) { groupReviver = null; }
+		if ( groupRevivers===undefined ) { groupRevivers = null; }
 		if ( levelReviver===undefined ) { levelReviver = null; }
 	}
 	if ( _number===undefined ) { _number = 1; }
 	if ( _debug!==false ) {
 		if ( arguments.length>4 ) { throw new Error('jTabDoc.parse(tabLines, reviver, number, debug, ...)'); }
-		if ( _debug===undefined ) { _debug = true; }
+		if ( <unknown>_debug===undefined ) { _debug = true; }
 		else if ( _debug!==true ) { throw new TypeError('jTabDoc.stringify(,,,debug)'); }
 		if ( !isArray(tabLines) ) { throw new TypeError('jTabDoc.parse(tabLines)'); }
-		if ( notStringArray(tabLines) ) { throw new TypeError('jTabDoc.parse(tabLines[*])'); }
-		if ( typeof countEmpties!=='boolean' ) { throw new TypeError('jTabDoc.parse(,reviver.empty)'); }
-		if ( groupReviver!==null && typeof groupReviver!=='boolean' ) {
-			if ( !isArray(groupReviver) ) { throw new TypeError('jTabDoc.parse(,reviver.group)'); }
-			var length = groupReviver.length;
+		if ( notStringArray(<unknown[]>tabLines) ) { throw new TypeError('jTabDoc.parse(tabLines[*])'); }
+		if ( typeof <unknown>countEmpties!=='boolean' ) { throw new TypeError('jTabDoc.parse(,reviver.empty)'); }
+		if ( groupRevivers!==null && typeof groupRevivers!=='boolean' ) {
+			if ( !isArray(groupRevivers) ) { throw new TypeError('jTabDoc.parse(,reviver.group)'); }
+			var length :number = groupRevivers.length;
 			if ( !length ) { throw new Error('jTabDoc.parse(,reviver.group.length)'); }
-			var index = 0;
+			var index :number = 0;
 			do {
-				var each = groupReviver[index];
+				var each :groupReviver = groupRevivers[index];
 				if ( !each ) { throw new TypeError('jTabDoc.parse(,reviver.group[*])'); }
 				if ( !each[0] || typeof each[0].exec!=='function' ) { throw new TypeError('jTabDoc.parse(,reviver.group[*][0])'); }
 				if ( typeof each[1]!=='function' ) { throw new TypeError('jTabDoc.parse(,reviver.group[*][1])'); }
 			}
-			while ( ++index<length )
+			while ( ++index<length );
 		}
 		if ( levelReviver!==null && typeof levelReviver!=='function' ) { throw new TypeError('jTabDoc.parse(,reviver.level)'); }
 		if ( typeof _number!=='number' ) { throw new TypeError('jTabDoc.parse(,,number)'); }
-		if ( !POSITIVE_INTEGER.test(_number) ) { throw new RangeError('jTabDoc.parse(,,number)'); }
+		if ( !POSITIVE_INTEGER.test(_number+'') ) { throw new RangeError('jTabDoc.parse(,,number)'); }
 	}
-	return tabLines.length===0 ?
-		levelReviver===null ? [] : levelReviver([], this) :
-		Level(this, tabLines, groupReviver ? appendGroup : appendFlat, countEmpties, groupReviver, levelReviver, _number, _debug);
+	return tabLines.length===0
+		? levelReviver===null ? [] : levelReviver([], this)
+		: Level(
+			this,
+			<string[]>tabLines,
+			groupRevivers
+				? appendGroup
+				: appendFlat,
+			countEmpties,
+			groupRevivers,
+			levelReviver,
+			_number,
+			_debug
+		);
 };
 
-function Level (context, tabLines, append, countEmpties, groupReviver, levelReviver, number, debug) {
-	var level     = [],
-		lastIndex = tabLines.length-1,
-		index     = 0,
-		blank     = tabLines[0].length===0;
+function Level (
+	context :any,
+	tabLines :string[],
+	append :typeof appendGroup | typeof appendFlat,
+	countEmpties :boolean,
+	groupRevivers :null | boolean | groupReviver[],
+	levelReviver :null | levelReviver,
+	number :number,
+	debug :boolean
+) :any {
+	var level :level      = [],
+		lastIndex :number = tabLines.length-1,
+		index :number     = 0,
+		blank :boolean    = tabLines[0].length===0;
 	outer: for ( ; ; ) {
-		var from = index;
+		var from :number = index;
 		if ( blank ) {
 			if ( countEmpties ) {
 				for ( ; ; ) {
@@ -86,11 +134,13 @@ function Level (context, tabLines, append, countEmpties, groupReviver, levelRevi
 		else {
 			for ( ; ; ) {
 				if ( index===lastIndex ) {
-					append(context, level, countEmpties, groupReviver, levelReviver, tabLines, from, index, number, debug);
+					// @ts-ignore
+					append(context, level, countEmpties, <null | false>groupRevivers, levelReviver, tabLines, from, index, number, debug);
 					break outer;
 				}
 				if ( tabLines[++index].length===0 ) {
-					append(context, level, countEmpties, groupReviver, levelReviver, tabLines, from, index-1, number, debug);
+					// @ts-ignore
+					append(context, level, countEmpties, <true | groupReviver[]>groupRevivers, levelReviver, tabLines, from, index-1, number, debug);
 					blank = true;
 					break;
 				}
@@ -101,11 +151,22 @@ function Level (context, tabLines, append, countEmpties, groupReviver, levelRevi
 	return levelReviver===null ? level : levelReviver(level, context);
 }
 
-function appendFlat (context, level, countEmpties, groupReviver, levelReviver, tabLines, firstIndex, lastIndex, baseNumber, debug) {
-	var key,
-		value,
-		number;
-	outer: for ( var lineIndex = firstIndex, line = tabLines[lineIndex], tabIndex = line.indexOf('\t'); ; ) {
+function appendFlat (
+	context :any,
+	level :level,
+	countEmpties :boolean,
+	groupRevivers :null | false,
+	levelReviver :null | levelReviver,
+	tabLines :string[],
+	firstIndex :number,
+	lastIndex :number,
+	baseNumber :number,
+	debug :boolean
+) :void {
+	var key :string,
+		value :string[],
+		number :number;
+	outer: for ( var lineIndex :number = firstIndex, line :string = tabLines[lineIndex], tabIndex :number = line.indexOf('\t'); ; ) {
 		value = [];
 		number = baseNumber+lineIndex;
 		if ( tabIndex=== -1 ) {
@@ -130,7 +191,7 @@ function appendFlat (context, level, countEmpties, groupReviver, levelReviver, t
 			}
 			for ( ; ; ) {
 				if ( lineIndex===lastIndex ) {
-					if ( groupReviver===null ) { value = Level(context, value, appendFlat, countEmpties, null, levelReviver, number, debug); }
+					if ( groupRevivers===null ) { value = Level(context, value, appendFlat, countEmpties, null, levelReviver, number, debug); }
 					break outer;
 				}
 				line = tabLines[++lineIndex];
@@ -138,7 +199,7 @@ function appendFlat (context, level, countEmpties, groupReviver, levelReviver, t
 				if ( tabIndex!==0 ) { break; }
 				value.push(line.slice(1));
 			}
-			if ( groupReviver===null ) { value = Level(context, value, appendFlat, countEmpties, null, levelReviver, number, debug); }
+			if ( groupRevivers===null ) { value = Level(context, value, appendFlat, countEmpties, null, levelReviver, number, debug); }
 		}
 		level.push({
 			key: key,
@@ -153,12 +214,23 @@ function appendFlat (context, level, countEmpties, groupReviver, levelReviver, t
 	});
 }
 
-function appendGroup (context, level, countEmpties, groupReviver, levelReviver, tabLines, firstIndex, lastIndex, baseNumber, debug) {
-	var pendingGroup = [],
-		pendingKeys  = '',
-		key,
-		value,
-		number;
+function appendGroup (
+	context :any,
+	level :level,
+	countEmpties :boolean,
+	groupRevivers :true | groupReviver[],
+	levelReviver :null | levelReviver,
+	tabLines :string[],
+	firstIndex :number,
+	lastIndex :number,
+	baseNumber :number,
+	debug :boolean
+) :void {
+	var pendingGroup :element[] = [],
+		pendingKeys :string     = '',
+		key :string,
+		value :string[],
+		number :number;
 	outer: for ( var lineIndex = firstIndex, line = tabLines[lineIndex], tabIndex = line.indexOf('\t'); ; ) {
 		value = [];
 		number = baseNumber+lineIndex;
@@ -204,15 +276,15 @@ function appendGroup (context, level, countEmpties, groupReviver, levelReviver, 
 		value: value,
 		number: number
 	});
-	if ( groupReviver===true ) {
+	if ( groupRevivers===true ) {
 		level.push(pendingGroup.length===1 ? pendingGroup[0] : pendingGroup);
 		return;
 	}
-	for ( var first = groupReviver[0], reviverLength = groupReviver.length, reviverIndex = 0, regExp_function = first; ; ) {
-		var matched = regExp_function[0].exec(pendingKeys);
+	for ( var first :groupReviver = groupRevivers[0], reviverLength :number = groupRevivers.length, reviverIndex = 0, regExp_function = first; ; ) {
+		var matched :null | RegExpExecArray = regExp_function[0].exec(pendingKeys);
 		if ( matched===null ) {
 			if ( ++reviverIndex===reviverLength ) { throw new Error('jTabDoc.parse(,reviver.group[!])'); }
-			regExp_function = groupReviver[reviverIndex];
+			regExp_function = groupRevivers[reviverIndex];
 		}
 		else {
 			if ( debug ) {
@@ -222,8 +294,8 @@ function appendGroup (context, level, countEmpties, groupReviver, levelReviver, 
 				if ( matched[0].length===0 ) { throw new Error('jTabDoc.parse(,reviver.group[*][0].exec()[0].length)'); }
 				if ( matched[0].charAt(matched[0].length-1)!=='\n' ) { throw new Error('jTabDoc.parse(,reviver.group[*][0].exec()[0])'); }
 			}
-			var thisKeys = matched[0];
-			var keyLength = thisKeys.length;
+			var thisKeys :string = matched[0];
+			var keyLength :number = thisKeys.length;
 			if ( pendingKeys.length===keyLength ) {
 				level.push(regExp_function[1](pendingGroup.length===1 ? pendingGroup[0] : pendingGroup, context));
 				if ( debug ) {
@@ -231,12 +303,12 @@ function appendGroup (context, level, countEmpties, groupReviver, levelReviver, 
 				}
 				return;
 			}
-			var count = 1;
-			for ( var indexOfLF = thisKeys.indexOf('\n'); ; ++count ) {
+			var count :number = 1;
+			for ( var indexOfLF :number = thisKeys.indexOf('\n'); ; ++count ) {
 				indexOfLF = thisKeys.indexOf('\n', indexOfLF+1);
 				if ( indexOfLF<0 ) { break; }
 			}
-			level.push(regExp_function[1](count===1 ? pendingGroup.shift() : pendingGroup.splice(0, count), context));
+			level.push(regExp_function[1](<element>( count===1 ? pendingGroup.shift() : pendingGroup.splice(0, count) ), context));
 			if ( debug ) {
 				if ( level[level.length-1]===undefined ) { throw new TypeError('jTabDoc.parse(,reviver.group[*][1]())'); }
 			}
