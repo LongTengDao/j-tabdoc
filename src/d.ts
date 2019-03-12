@@ -1,5 +1,7 @@
 declare module '@ltd/j-tabdoc' {
 	
+	export const version :string;
+	
 	type element = {
 		key :string,
 		value :string[],
