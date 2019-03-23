@@ -1,5 +1,5 @@
-import undefined from '.undefined';
-import { isArray } from './global';
+import undefined from '.void';
+import isArray from '.Array.isArray?=';
 import push from '.Array.prototype.push';
 import TypeError from '.TypeError';
 import Error from '.Error';

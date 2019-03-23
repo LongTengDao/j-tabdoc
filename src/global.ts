@@ -1,7 +1,4 @@
 import hasOwnProperty from '.Object.prototype.hasOwnProperty';
-import toString from '.Object.prototype.toString';
-import Array_isArray from '.Array.isArray';
-export var isArray = Array_isArray || function isArray (lines :any) :boolean { return toString.call(lines)==='[object Array]'; };
 
 import Buffer from '.Buffer';
 export var toStringFollowBOM;

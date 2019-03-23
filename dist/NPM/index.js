@@ -1,16 +1,15 @@
 ﻿'use strict';
 
-var version = '2.2.0';
+var version = '2.3.0';
 
 var undefined$1 = void 0;
 
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-
 var toString = Object.prototype.toString;
 
-var Array_isArray = Array.isArray;
+var isArray = Array.isArray || function isArray (value) { return toString.call(value)==='[object Array]'; };
 
-var isArray = Array_isArray || function isArray(lines) { return toString.call(lines) === '[object Array]'; };
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
 var toStringFollowBOM;
 var isBuffer = /*#__PURE__*/ function () {
     if (typeof Buffer === 'function') {
@@ -84,11 +83,8 @@ function parse(tabLines, _reviver, _number, _debug) {
         var levelReviver = null;
     }
     else {
-        // @ts-ignore
         countEmpties = _reviver.empty;
-        // @ts-ignore
         groupRevivers = _reviver.group;
-        // @ts-ignore
         levelReviver = _reviver.level;
         if (countEmpties === undefined$1) {
             countEmpties = true;

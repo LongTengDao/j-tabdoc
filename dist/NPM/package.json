@@ -1,7 +1,7 @@
 {
 	"name": "@ltd/j-tabdoc",
 	"description": "The official standard implementation of TabDoc. Belong to \"Plan J\".／TabDoc 的官方标准实现。从属于“简计划”。",
-	"version": "2.2.0",
+	"version": "2.3.0",
 	"license": "LGPL-3.0",
 	"author": "龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)",
 	"bugs": "https://GitHub.com/LongTengDao/j-tabdoc/issues",

@@ -1,5 +1,6 @@
-import undefined from '.undefined';
-import { isArray, isBuffer, toStringFollowBOM } from './global';
+import undefined from '.void';
+import isArray from '.Array.isArray?=';
+import { isBuffer, toStringFollowBOM } from './global';
 import TypeError from '.TypeError';
 import RangeError from '.RangeError';
 import Error from '.Error';
@@ -35,16 +36,13 @@ export default function parse (
 		else if ( isBuffer(tabLines) ) { tabLines = toStringFollowBOM(tabLines).split(EOL); }
 	}
 	if ( _reviver==null ) {
-		var countEmpties :boolean = true;
-		var groupRevivers :null | boolean | groupReviver[] = null;
-		var levelReviver :null | levelReviver = null;
+		var countEmpties :undefined | boolean = true;
+		var groupRevivers :undefined | null | boolean | groupReviver[] = null;
+		var levelReviver :undefined | null | levelReviver = null;
 	}
 	else {
-		// @ts-ignore
 		countEmpties = _reviver.empty;
-		// @ts-ignore
 		groupRevivers = _reviver.group;
-		// @ts-ignore
 		levelReviver = _reviver.level;
 		if ( countEmpties===undefined ) { countEmpties = true; }
 		if ( groupRevivers===undefined ) { groupRevivers = null; }
